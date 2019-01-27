@@ -7,6 +7,7 @@
  */
 require_once "autoload.php";
 
+use src\interfaces\EventInterface;
 use src\events\EventsFactoryMethod;
 use src\logs\LogEventMySQL;
 use src\logs\LogEventFile;
@@ -14,6 +15,9 @@ use src\logs\LogEventFile;
 /**
  * @param $id
  * @param $comment
+ * @param $moderator_id
+ * @param $user_id
+ * @throws Exception
  */
 function blockBook($id, $comment, $moderator_id, $user_id)
 {
@@ -28,16 +32,26 @@ function blockBook($id, $comment, $moderator_id, $user_id)
         'email' => 'user@site.com'
     ];
 
-    EventsFactoryMethod::makeEvent('block_book', $params)->run();
-
+    $event = EventsFactoryMethod::makeEvent('block_book', $params);
+    
+    if(!$event instanceof EventInterface){
+        throw new Exception('wrong event type!');
+    }
+    $event->run();
+    
     print_r("---------- block book(with logging into a file) ----------\n");
     $logEvent = new LogEventFile();
 
-    EventsFactoryMethod::makeEvent('block_book', $params)->run($logEvent);
+    if(!$event instanceof EventInterface){
+        throw new Exception('wrong event type!');
+    }
+
+    $event->run($logEvent);
 }
 
 /**
  * @param $userId
+ * @throws Exception
  */
 function wrongPassword($userId)
 {
@@ -49,7 +63,13 @@ function wrongPassword($userId)
 
     $logEvent = new LogEventMySQL();
 
-    EventsFactoryMethod::makeEvent('wrong_password', $params)->run($logEvent);
+    $event = EventsFactoryMethod::makeEvent('wrong_password', $params);
+    
+    if(!$event instanceof EventInterface){
+        throw new Exception('wrong event type!');
+    }
+    
+    $event->run($logEvent);
 }
 
 /**
@@ -57,6 +77,7 @@ function wrongPassword($userId)
  * @param $payment_amount
  * @param $payment_currency
  * @param $payment_details
+ * @throws Exception
  */
 function royaltyPayment($userId, $payment_amount, $payment_currency, $payment_details)
 {
@@ -70,13 +91,20 @@ function royaltyPayment($userId, $payment_amount, $payment_currency, $payment_de
     
     $logEvent = new LogEventMySQL();
 
-    EventsFactoryMethod::makeEvent('royalty_payment', $params)->run($logEvent);
+    $event = EventsFactoryMethod::makeEvent('royalty_payment', $params);
+
+    if(!$event instanceof EventInterface){
+        throw new Exception('wrong event type!');
+    }
+
+    $event->run($logEvent);
 }
 
 print_r("---------- block book ----------\n");
 blockBook(1, 'plagiarism', 2, 3);
+
 print_r("---------- wrong password ----------\n");
 wrongPassword(123);
-print_r("---------- royalty payment ----------\n");
-royaltyPayment(123, 100, "$", "Vice");
 
+print_r("---------- royalty payment ----------\n");
+royaltyPayment(123, 100, "$", "Visa");

@@ -70,7 +70,6 @@ class Event implements EventInterface
     }
 
     /**
-     * @param $class
      * @throws \Exception
      */
     protected function saveLogs(){

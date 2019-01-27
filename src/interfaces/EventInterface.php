@@ -10,8 +10,9 @@ namespace src\interfaces;
 interface EventInterface
 {
     /**
-     * @return mixed
+     * @param LogInterface|null $logEvent
+     * @param array $notificationsTypes
      */
-    public function run();
+    public function run(LogInterface $logEvent = null, array $notificationsTypes = []);
     
 }
